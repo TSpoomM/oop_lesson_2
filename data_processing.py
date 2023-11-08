@@ -15,6 +15,28 @@ with open(os.path.join(__location__, 'Countries.csv')) as f:
     for r in rows:
         countries.append(dict(r))
 
+# Load the Titanic.csv dataset
+titanic_data = []
+with open(os.path.join(__location__, 'Titanic.csv')) as f:
+    rows = csv.DictReader(f)
+    for r in rows:
+        titanic_data.append(dict(r))
+
+# Load the Players.csv dataset
+players_data = []
+with open(os.path.join(__location__, 'Players.csv')) as f:
+    rows = csv.DictReader(f)
+    for r in rows:
+        players_data.append(dict(r))
+
+# Load the Teams.csv dataset
+teams_data = []
+with open(os.path.join(__location__, 'Teams.csv')) as f:
+    rows = csv.DictReader(f)
+    for r in rows:
+        teams_data.append(dict(r))
+
+
 class DB:
     def __init__(self):
         self.database = []
@@ -27,8 +49,11 @@ class DB:
             if table.table_name == table_name:
                 return table
         return None
-    
+
+
 import copy
+
+
 class Table:
     def __init__(self, table_name, table):
         self.table_name = table_name
@@ -71,6 +96,7 @@ class Table:
     def __str__(self):
         return self.table_name + ':' + str(self.table)
 
+
 table1 = Table('cities', cities)
 table2 = Table('countries', countries)
 my_DB = DB()
@@ -78,7 +104,7 @@ my_DB.insert(table1)
 my_DB.insert(table2)
 my_table1 = my_DB.search('cities')
 
-print("Test filter: only filtering out cities in Italy") 
+print("Test filter: only filtering out cities in Italy")
 my_table1_filtered = my_table1.filter(lambda x: x['country'] == 'Italy')
 print(my_table1_filtered)
 print()
@@ -121,3 +147,51 @@ for item in my_table2.table:
     if len(my_table1_filtered.table) >= 1:
         print(item['country'], my_table1_filtered.aggregate(lambda x: min(x), 'latitude'), my_table1_filtered.aggregate(lambda x: max(x), 'latitude'))
 print()
+
+
+# Create tables for the new datasets and insert them into the database
+table3 = Table('Titanic', titanic_data)
+table4 = Table('Players', players_data)
+table5 = Table('Teams', teams_data)
+
+my_DB.insert(table3)
+my_DB.insert(table4)
+my_DB.insert(table5)
+
+# First
+# Filter players based on the given conditions
+filtered_players = table4.filter(lambda x: 'ia' in x['team'] and int(x['minutes']) < 200 and int(x['passes']) > 100)
+
+# Select and display the player surname, team, and position
+selected_players = filtered_players.select(['surname', 'team', 'position'])
+print("Players :")
+print(selected_players)
+print()
+
+
+# Second
+# Filter teams based on their ranking
+teams_below_10 = table5.filter(lambda x: int(x['ranking']) < 10)
+teams_10_and_above = table5.filter(lambda x: int(x['ranking']) >= 10)
+
+# Calculate the average number of games played for each group of teams
+avg_games_below_10 = teams_below_10.aggregate(lambda x: sum(x) / len(x), 'games')
+avg_games_10_and_above = teams_10_and_above.aggregate(lambda x: sum(x) / len(x), 'games')
+
+print(f"Average games played for teams below 10: {avg_games_below_10}")
+print(f"Average games played for teams 10 and above: {avg_games_10_and_above}")
+print()
+
+
+# Third
+# Filter players based on their positions
+forwards = table4.filter(lambda x: x['position'] == 'forward')
+midfielders = table4.filter(lambda x: x['position'] == 'midfielder')
+
+# Calculate the average number of passes for each group of players
+avg_passes_forwards = forwards.aggregate(lambda x: sum(x) / len(x), 'passes')
+avg_passes_midfielders = midfielders.aggregate(lambda x: sum(x) / len(x), 'passes')
+
+print(f"Average passes made by forwards: {avg_passes_forwards}")
+print(f"Average passes made by midfielders: {avg_passes_midfielders}")
+
