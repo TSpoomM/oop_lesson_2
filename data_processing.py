@@ -227,3 +227,14 @@ female_survived = [x for x in female_passengers.table if x['survived'] == 'yes']
 print(f"Survival number of male passengers: {len(male_survived)}")
 print(f"Survival number of female passengers: {len(female_survived)}")
 print(f"The survival rate of male versus female passengers : {len(male_survived) / len(female_survived)}")
+
+
+# sixth
+# Filter for male passengers who embarked at Southampton
+male_passengers_southampton = table3.filter(lambda x: x['gender'] == 'M' and x['embarked'] == 'Southampton')
+
+# Calculate the total number of male passengers who embarked at Southampton
+total_male_passengers_southampton = len(male_passengers_southampton.table)
+
+print("Total number of male passengers embarked at Southampton:", total_male_passengers_southampton)
+
